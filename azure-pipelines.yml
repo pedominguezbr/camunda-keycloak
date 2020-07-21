@@ -1,0 +1,47 @@
+---
+
+    trigger:
+    - master
+    
+    pool:
+      name: kubernetes-spsa
+    
+    steps:
+    # Create a variable
+    - script: echo "##vso[task.setvariable variable=tag;isOutput=true]${BUILD_SOURCEVERSION:0:8}"
+      name: setTagStep
+    - script: echo $(setTagStep.tag)
+      name: echovar
+    - script: |
+       sed -ie "s/#{tag}/$(setTagStep.tag)/g" Deploy.yaml
+       cp Deploy.yaml Deploy-prd.yaml
+       cat Deploy.yaml
+      displayName: 'Completando Deploy.yaml'
+    
+    #- task: SonarQubePrepare@4
+    #  inputs:
+    #    SonarQube: 'spsa-integraciones'
+    #    scannerMode: 'CLI'
+    #    configMode: 'manual'
+    #    cliProjectKey: '$(Build.Repository.Name)'
+    #    cliProjectName: '$(Build.Repository.Name)'
+    #    cliProjectVersion: '$(Build.SourceVersion)'
+    #    cliSources: '.'
+    #- task: SonarQubeAnalyze@4
+    #- task: SonarQubePublish@4
+    #  inputs:
+    #    pollingTimeoutSec: '300'
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'ibm-cloud-cr'
+        repository: 'camunda-apps/sp-bpm-venta-desagregada'
+        command: 'buildAndPush'
+        tags: '$(setTagStep.tag)'
+    
+    - task: CopyFiles@2
+      inputs:
+        contents: '*.yaml'
+        targetFolder: $(Build.ArtifactStagingDirectory)
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: drop'

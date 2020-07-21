@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: sp-bpm-venta-desagregada-deployment
+spec:
+   replicas: #{nreplicas}
+   selector:
+      matchLabels:
+         app: sp-bpm-venta-desagregada
+   minReadySeconds: 10
+   strategy:
+      type: RollingUpdate
+      rollingUpdate:
+         maxUnavailable: 1
+         maxSurge: 1
+   template:
+      metadata:
+         labels:
+            app: sp-bpm-venta-desagregada
+      spec:
+         imagePullSecrets:
+           - name: ibm-cloud-cr
+         containers:
+         - name: sp-bpm-venta-desagregada
+           envFrom:
+           - secretRef:
+               name: sp-venta-desagregada-camunda-db
+               optional: false
+           - secretRef:
+               name: sp-venta-desagregada-camunda-auth
+               optional: false
+           - secretRef:
+               name: sp-venta-desagregada-camunda-url
+               optional: false
+           image: us.icr.io/camunda-apps/sp-bpm-venta-desagregada:#{tag}
+           ports:
+           - containerPort: 8080        
+#           env:
+#           - name: JDBC_URL
+#             value: jdbc:postgresql://postgres-service:5432/camunda
+#           - name: JDBC_USER
+#             value: camunda
+#           - name: JDBC_PASSWORD
+#             value: camunda1!
+#           - name: KEYCLOAK_URL_AUTH
+#             value: http://armstrong02
+#           - name: KEYCLOAK_URL_TOKEN
+#             value: http://keycloak-server-service:8080
+#           - name: KEYCLOAK_URL_PLUGIN
+#             value: https://keycloak-server-service:8443
+#           - name: KEYCLOAK_CLIENT_ID
+#             value: camunda-identity-service
+#           - name: KEYCLOAK_CLIENT_SECRET
+#             value: 0ca35c49-c721-44dd-a6c2-a5e825e13c84
+#         hostAliases:
+#         - ip: 10.0.75.1
+#           hostnames:
+#           - armstrong02
+# Redis Session Cache not yet in use
+#           - name: SESSION_STORE_TYPE
+#             value: redis
+#           - name: REDIS_HOST
+#             value: redis-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: sp-bpm-venta-desagregada-service
+   labels:
+      app: sp-bpm-venta-desagregada
+spec:
+   type: ClusterIP
+   ports: 
+   - port: 8080
+     targetPort: 8080
+   selector:
+      app: sp-bpm-venta-desagregada
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sp-bpm-venta-desagregada-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "800"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "800"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-path: "/"
+    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    nginx.ingress.kubernetes.io/session-cookie-expires: "300"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "300"
+
+
+spec:
+  rules:
+  - host: sp-bpm-venta-desagregada-#{ambiente}.#{host}
+    http:
+      paths:
+        - path: /camunda
+          backend:
+            serviceName: sp-bpm-venta-desagregada-service
+            servicePort: 8080
+#        - path: /auth
+#          backend:
+#            serviceName: keycloak-auth.keycloak
+#            servicePort: 8080
+  tls:
+    - hosts:
+      - sp-bpm-venta-desagregada-#{ambiente}.#{host}
+      secretName: #{secretName}
+            

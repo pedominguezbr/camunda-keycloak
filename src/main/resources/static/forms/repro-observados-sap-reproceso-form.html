@@ -1,0 +1,150 @@
+<form class="vertical" enctype="multipart/form-data">
+	<div class="w3-bar w3-red">
+    	<button name="tab1" class="w3-bar-item w3-button tablink w3-green">Datos Generales</button>
+  	</div>
+	<div id="tab1" class="w3-container w3-border data">
+		<div class="w3-container">
+			
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Sociedad: </label></div>
+						<div class="w3-half"><span id="sociedad" class="w3-small"></span></div>
+					</div>
+				</div>
+		  		<div class="w3-third">
+		  			<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Local: </label></div>
+						<div class="w3-half"><span id="codlocal" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Descripci&oacute;n: </label></div>
+						<div class="w3-half"><span id="localdescripcion" class="w3-small"></span></div>
+					</div>
+				</div>
+			</div>
+			<p>
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<div class="w3-row">
+				  		<div class="w3-half"><label class="w3-small">Fecha Proceso: </label></div>
+						<div class="w3-half"><span id="fecproceso" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Centro Costo: </label></div>
+						<div class="w3-half"><span id="centrocosto" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Estado: </label></div>
+						<div class="w3-half"><span id="estado" class="w3-small"></span></div>
+					</div>
+				</div>
+				
+			</div>
+			<p>
+			<div class="w3-row">
+				<div class="w3-row">
+					<div class="w3-row w3-row-padding">
+				  		<div class="w3-col l2"><label class="w3-small">Mensaje SAP: </label></div>
+						<div class="w3-col l10"><span id="mensajesap" class="w3-small"></span></div>
+					</div>
+				</div>
+				
+			</div>
+			<p>
+			
+		</div>
+
+	</div>
+	<br>
+	<div class="w3-container">
+		<div class="w3-row-padding">
+			<div class="w3-third">
+				<button id="btn_accept" class="w3-btn w3-round w3-red w3-hover-green">Procesar</button>
+
+				<!--<button id="btn_refuse" class="w3-btn w3-round w3-red w3-hover-green">Rechazar</button>-->
+			</div>
+		</div>
+	</div>
+	
+	<input id="rechazado" type="hidden" cam-variable-name="rechazado" cam-variable-type="String" />
+	
+	<script cam-script type="text/form-script">
+	inject(['$scope', '$http', function($scope, $http) {
+		var variableManager = camForm.variableManager;
+		//var flagRechazado = false;
+
+		camForm.on('form-loaded', function() {
+			
+			variableManager.fetchVariable('sociedad');
+			variableManager.fetchVariable('codlocal');
+			variableManager.fetchVariable('localdescripcion');
+			variableManager.fetchVariable('fecproceso');
+			variableManager.fetchVariable('estado');
+			variableManager.fetchVariable('centrocosto');
+			variableManager.fetchVariable('mensajesap');
+			
+			$(".tablink").click(function(event){
+				var name = $(this).attr('name');
+				openTab(event, name)
+			});
+
+  			function openTab(evt, tabName) {
+  				var i, x, tablinks;
+  				x = document.getElementsByClassName("data");
+  				for (i = 0; i < x.length; i++) {
+    				x[i].style.display = "none";
+  				}
+  				tablinks = document.getElementsByClassName("tablink");
+  				for (i = 0; i < x.length; i++) {
+    				tablinks[i].className = tablinks[i].className.replace(" w3-green", "");
+  				}
+  				document.getElementById(tabName).style.display = "block";
+  				evt.currentTarget.className += " w3-green";
+			}
+
+			$(".btn-primary").attr('style', 'display: none');
+			$(".btn-default").attr('style', 'display: none');
+			$(".btn_refuse").attr('style', 'display: none');
+			
+			$("#btn_accept").click(function() {
+				$("#btn_accept").addClass(" w3-disabled");
+				$("#btn_refuse").addClass(" w3-disabled");
+				$("#rechazado").val("false");
+				$(".btn-primary").click();
+			});
+
+			$("#btn_refuse").click(function() {
+				$("#btn_accept").addClass(" w3-disabled");
+				$("#btn_refuse").addClass(" w3-disabled");
+				$(".btn-primary").click();
+			});
+
+		});
+
+		camForm.on('variables-fetched', function() {
+      		// after the variables are fetched, bind the value of customerData to a angular
+      		// scope value such that the form can work on it
+      		//var supplierData = JSON.parse(variableManager.variable('supplierData').value);
+			// access to all process variables after the form has loaded
+            console.log(variableManager.variables);
+			
+			
+			$("#sociedad")[0].innerHTML = variableManager.variable('sociedad').value;
+			$("#codlocal")[0].innerHTML =  variableManager.variable('codlocal').value;
+			$("#localdescripcion")[0].innerHTML =  variableManager.variable('localdescripcion').value;
+			$("#fecproceso")[0].innerHTML =  variableManager.variable('fecproceso').value;
+			$("#estado")[0].innerHTML =  variableManager.variable('estado').value;
+			$("#centrocosto")[0].innerHTML =  variableManager.variable('centrocosto').value;
+			$("#mensajesap")[0].innerHTML = variableManager.variable('mensajesap').value;
+			
+    	});
+	}]);
+	</script>
+</form>

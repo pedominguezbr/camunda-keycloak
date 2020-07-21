@@ -1,0 +1,206 @@
+<form class="vertical" enctype="multipart/form-data">
+	<div class="w3-bar w3-red">
+    	<button name="tab1" class="w3-bar-item w3-button tablink w3-green">Datos Generales</button>
+  	</div>
+	<div id="tab1" class="w3-container w3-border data">
+		<div class="w3-container">
+			
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Sociedad: </label></div>
+						<div class="w3-half"><span id="sociedad" class="w3-small"></span></div>
+					</div>
+				</div>
+		  		<div class="w3-third">
+		  			<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Local: </label></div>
+						<div class="w3-half"><span id="codlocal" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Descripci&oacute;n: </label></div>
+						<div class="w3-half"><span id="localdescripcion" class="w3-small"></span></div>
+					</div>
+				</div>
+			</div>
+			<p>
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<div class="w3-row">
+				  		<div class="w3-half"><label class="w3-small">Fecha Proceso: </label></div>
+						<div class="w3-half"><span id="fecproceso" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Estado: </label></div>
+						<div class="w3-half"><span id="estado" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+						<div class="w3-half"><label class="w3-small">Monto Total Vta: </label></div>
+						<div class="w3-half"><span id="totalvta" class="w3-small"></span></div>
+					</div>
+				</div>
+			</div>
+			<p>
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<div class="w3-row">
+				  		<div class="w3-half"><label class="w3-small">IGV Informado A: </label></div>
+						<div class="w3-half"><span id="igvinformado" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+				  		<div class="w3-half"><label class="w3-small">IGV Calculado B: </label></div>
+						<div class="w3-half"><span id="igvcalculado" class="w3-small"></span></div>
+					</div>
+				</div>
+				<div class="w3-third">
+					<div class="w3-row">
+				  		<div class="w3-half"><label class="w3-small">Diferencia B-A: </label></div>
+						<div class="w3-half"><span id="igvdiferencia" class="w3-small"></span></div>
+					</div>
+				</div>
+			</div>
+			<p>
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<div class="w3-row">
+				  		<div class="w3-half"><label class="w3-small">Tolerancia: </label></div>
+						<div class="w3-half"><span id="tolerancia" class="w3-small"></span></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="w3-container">
+			<p>
+			<div class="w3-container w3-border-bottom w3-light-gray">
+				<h4>Se acepta la diferencia B-A?</h4>
+			</div>
+			<p>
+			<div class="w3-row-padding">
+				<div class="w3-third">
+					<label for="aprobar">Aceptado</label><br>
+					<input type="radio" id="aprobar" name="selectedUser" value="aceptar">
+				</div>
+				<div class="w3-third">
+					<label for="rechazar">Rechazado</label><br>
+					<input type="radio" id="rechazar" name="selectedUser" value="rechazar">
+				</div>
+			</div>
+		</div>
+	</div>
+	<br>
+	<div class="w3-container">
+		<div class="w3-row-padding">
+			<div class="w3-third">
+				<button id="btn_accept" class="w3-btn w3-round w3-red w3-hover-green">Procesar</button>
+
+				<!--<button id="btn_refuse" class="w3-btn w3-round w3-red w3-hover-green">Rechazar</button>-->
+			</div>
+		</div>
+	</div>
+	
+	<input id="rechazado" type="hidden" cam-variable-name="rechazado" cam-variable-type="String" />
+	
+	<script cam-script type="text/form-script">
+	inject(['$scope', '$http', function($scope, $http) {
+		var variableManager = camForm.variableManager;
+		//var flagRechazado = false;
+
+		camForm.on('form-loaded', function() {
+			variableManager.fetchVariable('correlativo');
+			variableManager.fetchVariable('sociedad');
+			variableManager.fetchVariable('codlocal');
+			variableManager.fetchVariable('localdescripcion');
+			variableManager.fetchVariable('fecproceso');
+			variableManager.fetchVariable('totalvta');
+			variableManager.fetchVariable('igvinformado');
+			variableManager.fetchVariable('igvcalculado');
+			variableManager.fetchVariable('igvdiferencia');
+			variableManager.fetchVariable('estado');
+			variableManager.fetchVariable('tolerancia');
+			
+			$(".tablink").click(function(event){
+				var name = $(this).attr('name');
+				openTab(event, name)
+			});
+
+  			function openTab(evt, tabName) {
+  				var i, x, tablinks;
+  				x = document.getElementsByClassName("data");
+  				for (i = 0; i < x.length; i++) {
+    				x[i].style.display = "none";
+  				}
+  				tablinks = document.getElementsByClassName("tablink");
+  				for (i = 0; i < x.length; i++) {
+    				tablinks[i].className = tablinks[i].className.replace(" w3-green", "");
+  				}
+  				document.getElementById(tabName).style.display = "block";
+  				evt.currentTarget.className += " w3-green";
+			}
+
+			$(".btn-primary").attr('style', 'display: none');
+			$(".btn-default").attr('style', 'display: none');
+			$(".btn_refuse").attr('style', 'display: none');
+			
+			$("#btn_accept").click(function() {
+				$("#btn_accept").addClass(" w3-disabled");
+				$("#btn_refuse").addClass(" w3-disabled");
+				$("#rechazado").val("false");
+				$(".btn-primary").click();
+			});
+
+			$("#btn_refuse").click(function() {
+				$("#btn_accept").addClass(" w3-disabled");
+				$("#btn_refuse").addClass(" w3-disabled");
+				$(".btn-primary").click();
+			});
+
+		});
+
+		camForm.on('variables-fetched', function() {
+      		// after the variables are fetched, bind the value of customerData to a angular
+      		// scope value such that the form can work on it
+      		//var supplierData = JSON.parse(variableManager.variable('supplierData').value);
+			// access to all process variables after the form has loaded
+            console.log(variableManager.variables);
+			
+			
+			$("#sociedad")[0].innerHTML = variableManager.variable('sociedad').value;
+			$("#codlocal")[0].innerHTML =  variableManager.variable('codlocal').value;
+			
+			$("#localdescripcion")[0].innerHTML =  variableManager.variable('localdescripcion').value;
+			//$("#codproceso")[0].innerHTML =  variableManager.variable('codproceso').value;
+			$("#fecproceso")[0].innerHTML =  variableManager.variable('fecproceso').value;
+			$("#totalvta")[0].innerHTML =  variableManager.variable('totalvta').value;
+			$("#igvinformado")[0].innerHTML =  variableManager.variable('igvinformado').value;
+			$("#igvcalculado")[0].innerHTML = variableManager.variable('igvcalculado').value;
+			$("#igvdiferencia")[0].innerHTML = variableManager.variable('igvdiferencia').value;
+			$("#estado")[0].innerHTML = variableManager.variable('estado').value;
+			$("#tolerancia")[0].innerHTML = variableManager.variable('tolerancia').value;
+	
+    	});
+		
+		camForm.on('submit',  function(evt)  {
+			// selectedUser represents the name of the radio group created above
+			if ($('input:radio[name=selectedUser]:checked').val()==null) {
+				alert('Debe seleccionar una opcion, Aceptado o Rechazado.');
+				evt.submitPrevented = true;
+			}
+			variableManager.createVariable({
+			  name: 'selectedUser',
+			  type: 'String',
+			  value: $('input:radio[name=selectedUser]:checked').val(),
+			  isDirty: true
+			});
+		});
+
+	}]);
+	</script>
+</form>

@@ -1,0 +1,76 @@
+spring.datasource:
+  url: ${JDBC_URL:jdbc:postgresql://10.20.17.50:5532/sp_bpm_backoffice}
+  username: ${JDBC_USER:sp_bpm_backoffice}
+  password: ${JDBC_PASSWORD:Spsa2019}
+#spring.h2.console.enabled: true
+
+spring:
+  jersey:
+    application-path: /engine-rest
+
+# Redis Session Cache not yet in use
+#  session:
+#    store-type: ${SESSION_STORE_TYPE:none}
+#    redis.flush-mode: immediate
+#  redis:
+#    host: ${REDIS_HOST:localhost}
+#    port: ${REDIS_PORT:6379}
+
+camunda.bpm:
+  history-level: audit
+  authorization:
+    enabled: true
+  filter:
+    create: All tasks
+
+server:
+  port: 8080
+  servlet.context-path: /camunda
+
+# Externalized Keycloak configuration
+keycloak:
+  # SSO Authentication requests. Send by application as redirect to the browser
+  url.auth: ${KEYCLOAK_URL_AUTH:https://keycloak.cpgw1.spsa.xyz}
+  #url.authhttp: ${KEYCLOAK_URL_AUTH_HTTP:http://localhost:9000}
+  # SSO Token requests. Send from the application to Keycloak
+  url.token: ${KEYCLOAK_URL_TOKEN:https://keycloak.cpgw1.spsa.xyz}
+  # Keycloak access for the Identity Provider plugin.
+  url.plugin: ${KEYCLOAK_URL_PLUGIN:https://keycloak.cpgw1.spsa.xyz}
+
+  # Keycloak Camunda Identity Client
+  client.id: ${KEYCLOAK_CLIENT_ID:venta-desagregada-identity-service}
+  client.secret: ${KEYCLOAK_CLIENT_SECRET:11f0ccad-78ee-46fd-9d2d-eaa4315e4b5b}
+
+  realm: ${KEYCLOAK_REALM:QA_SP_VENTA_DESAGREGADA}
+
+# Spring Boot SSO OAuth2 Security
+security:
+  oauth2:
+    client:
+      client-id: ${keycloak.client.id}
+      client-secret: ${keycloak.client.secret}
+      accessTokenUri: ${keycloak.url.token}/auth/realms/${keycloak.realm}/protocol/openid-connect/token
+      userAuthorizationUri: ${keycloak.url.auth}/auth/realms/${keycloak.realm}/protocol/openid-connect/auth
+      scope: openid profile email
+    resource:
+      userInfoUri: ${keycloak.url.auth}/auth/realms/${keycloak.realm}/protocol/openid-connect/userinfo
+
+logging.level.org.springframework.security: DEBUG
+
+# Camunda Rest API
+rest.security:
+  enabled: false
+  jwk-set-url: ${keycloak.url.token}/auth/realms/${keycloak.realm}/protocol/openid-connect/certs
+  required-audience: camunda-rest-api
+
+# Camunda Keycloak Identity Provider Plugin
+plugin.identity.keycloak:
+  keycloakIssuerUrl: ${keycloak.url.plugin}/auth/realms/${keycloak.realm}
+  keycloakAdminUrl: ${keycloak.url.plugin}/auth/admin/realms/${keycloak.realm}
+  clientId: ${keycloak.client.id}
+  clientSecret: ${keycloak.client.secret}
+  useEmailAsCamundaUserId: true
+  useUsernameAsCamundaUserId: false
+  useGroupPathAsCamundaGroupId: true
+  administratorGroupName: camunda-admin
+  disableSSLCertificateValidation: true
